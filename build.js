@@ -27,17 +27,20 @@ function moveToBuildFolder(f) {
   return f.replace(cwd, buildFolder)
 }
 
+const IGNORED = [
+  'node_modules',
+  '.git',
+  '.gitignore',
+  'package.json',
+  'package-lock.json',
+  '_header.html',
+  '_footer.html'
+].map(i => path.join(cwd, i))
+
 rimraf(buildFolder, () => {
   const files = klaw('.', {
-    filter: (f) => {
-      return f.path.indexOf('node_modules') < 0 &&
-            f.path.indexOf('.git') < 0 &&
-            f.path.indexOf('.gitignore') < 0 &&
-            f.path.indexOf('package.json') < 0 &&
-            f.path.indexOf('package-lock.json') < 0 &&
-            f.path.indexOf('build.js') < 0 &&
-            f.path.indexOf('_header.html') < 0 &&
-            f.path.indexOf('_footer.html') < 0
+    filter(f) {
+      return !IGNORED.find(i => f.path.indexOf(i) === 0)
     }
   })
 

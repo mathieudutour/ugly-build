@@ -8,4 +8,4 @@ if (!remote) {
   process.exit(1)
 }
 
-execSync(path.join(__dirname, 'deploy.sh') + ' ' + remote)
+execSync(path.join(__dirname, 'deploy.sh') + ' ' + path.join(process.cwd(), '.build') + ' ' + remote)
