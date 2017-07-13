@@ -51,21 +51,24 @@ rimraf(buildFolder, () => {
       return fs.mkdirSync(moveToBuildFolder(f.path))
     }
 
-    const content = fs.readFileSync(f.path, 'utf-8')
-
     const ext = path.extname(f.path)
 
     if (ext === '.js') {
+      const content = fs.readFileSync(f.path, 'utf-8')
       return fs.writeFileSync(moveToBuildFolder(f.path), Uglify.minify(content).code)
     }
 
     if (ext === '.css') {
+      const content = fs.readFileSync(f.path, 'utf-8')
       return fs.writeFileSync(moveToBuildFolder(f.path), csso.minify(content).css)
     }
 
-    if (path.extname(f.path) !== '.html') {
+    if (ext !== '.html') {
+      const content = fs.readFileSync(f.path)
       return fs.writeFileSync(moveToBuildFolder(f.path), content)
     }
+
+    const content = fs.readFileSync(f.path, 'utf-8')
 
     fs.writeFileSync(moveToBuildFolder(f.path), header + content + footer)
   })
