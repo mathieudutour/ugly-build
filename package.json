@@ -1,6 +1,6 @@
 {
   "name": "ugly-build",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,7 @@
     "csso": "^3.1.1",
     "klaw-sync": "^2.1.0",
     "rimraf": "^2.6.1",
+    "snarkdown": "^1.2.2",
     "uglify-js": "^3.0.24"
   }
 }

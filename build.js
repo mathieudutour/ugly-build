@@ -4,23 +4,31 @@ const fs = require('fs')
 const path = require('path')
 const Uglify = require('uglify-js')
 const csso = require('csso')
+const snarkdown = require('snarkdown')
 
 const cwd = process.cwd()
 const buildFolder = path.join(cwd, '.build')
 
 var header
 var footer
+var md
 
 try {
-  header = fs.readFileSync(path.join(cwd, '_header.html'))
+  header = fs.readFileSync(path.join(cwd, '_header.html'), 'utf-8')
 } catch (e) {
   header = ''
 }
 
 try {
-  footer = fs.readFileSync(path.join(cwd, '_footer.html'))
+  footer = fs.readFileSync(path.join(cwd, '_footer.html'), 'utf-8')
 } catch (e) {
   footer = ''
+}
+
+try {
+  md = fs.readFileSync(path.join(cwd, '_md.html'), 'utf-8')
+} catch (e) {
+  md = ''
 }
 
 function moveToBuildFolder(f) {
@@ -31,10 +39,12 @@ const IGNORED = [
   'node_modules',
   '.git',
   '.gitignore',
+  '.travis.yml',
   'package.json',
   'package-lock.json',
   '_header.html',
-  '_footer.html'
+  '_footer.html',
+  '_md.html'
 ].map(i => path.join(cwd, i))
 
 rimraf(buildFolder, () => {
@@ -52,6 +62,16 @@ rimraf(buildFolder, () => {
     }
 
     const ext = path.extname(f.path)
+
+    if (ext === '.md' && md) {
+      const content = fs.readFileSync(f.path, 'utf-8')
+      if (f.path.indexOf('README.md') === -1) {
+        fs.mkdirSync(moveToBuildFolder(f.path.replace('.md', '')))
+      }
+      return fs.writeFileSync(
+        moveToBuildFolder(f.path.replace('README.md', 'index.html').replace('.md', '/index.html')),
+        header + md.replace('{{path}}', f.path.replace(cwd, '')).replace('{{content}}', snarkdown(content)) + footer)
+    }
 
     if (ext === '.js') {
       const content = fs.readFileSync(f.path, 'utf-8')
