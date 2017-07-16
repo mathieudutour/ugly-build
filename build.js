@@ -4,7 +4,22 @@ const fs = require('fs')
 const path = require('path')
 const Uglify = require('uglify-js')
 const csso = require('csso')
-const snarkdown = require('snarkdown')
+const hljs = require('highlight.js')
+const mdRenderer = require('markdown-it')({
+  html: true,
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return '<pre class="hljs"><code>' +
+                hljs.highlight(lang, str, true).value +
+               '</code></pre>';
+      } catch (__) {}
+    }
+
+    return ''; // use external default escaping
+  }
+})
+mdRenderer.use(require('markdown-it-emoji'))
 
 const cwd = process.cwd()
 const buildFolder = path.join(cwd, '.build')
@@ -70,7 +85,7 @@ rimraf(buildFolder, () => {
       }
       return fs.writeFileSync(
         moveToBuildFolder(f.path.replace('README.md', 'index.html').replace('.md', '/index.html')),
-        header + md.replace('{{path}}', f.path.replace(cwd, '')).replace('{{content}}', snarkdown(content)) + footer)
+        header + md.replace('{{path}}', f.path.replace(cwd, '')).replace('{{content}}', mdRenderer.render(content)) + footer)
     }
 
     if (ext === '.js') {
