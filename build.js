@@ -1,3 +1,4 @@
+const zlib = require('zlib')
 const klaw = require('klaw-sync')
 const rimraf = require('rimraf')
 const fs = require('fs')
@@ -50,6 +51,12 @@ function moveToBuildFolder(f) {
   return f.replace(cwd, buildFolder)
 }
 
+function moveAndGzip(path, content) {
+  const outPath = moveToBuildFolder(path)
+  fs.writeFileSync(outPath, content)
+  fs.writeFileSync(outPath + '.gz', zlib.gzipSync(content))
+}
+
 const IGNORED = [
   'node_modules',
   '.git',
@@ -83,24 +90,22 @@ rimraf(buildFolder, () => {
       if (f.path.indexOf('README.md') === -1) {
         fs.mkdirSync(moveToBuildFolder(f.path.replace('.md', '')))
       }
-      return fs.writeFileSync(
-        moveToBuildFolder(f.path.replace('README.md', 'index.html').replace('.md', '/index.html')),
-        header + md.replace('{{path}}', f.path.replace(cwd, '')).replace('{{content}}', mdRenderer.render(content)) + footer)
+      return fs.writeFileSync(moveToBuildFolder(f.path.replace('README.md', 'index.html').replace('.md', '/index.html')), header + md.replace('{{path}}', f.path.replace(cwd, '')).replace('{{content}}', mdRenderer.render(content)) + footer)
     }
 
     if (ext === '.js') {
       const content = fs.readFileSync(f.path, 'utf-8')
-      return fs.writeFileSync(moveToBuildFolder(f.path), Uglify.minify(content).code)
+      return moveAndGzip(f.path, Uglify.minify(content).code)
     }
 
     if (ext === '.css') {
       const content = fs.readFileSync(f.path, 'utf-8')
-      return fs.writeFileSync(moveToBuildFolder(f.path), csso.minify(content).css)
+      return moveAndGzip(f.path, csso.minify(content).css)
     }
 
     if (ext !== '.html') {
       const content = fs.readFileSync(f.path)
-      return fs.writeFileSync(moveToBuildFolder(f.path), content)
+      return moveAndGzip(f.path, content)
     }
 
     const content = fs.readFileSync(f.path, 'utf-8')
