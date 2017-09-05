@@ -1,4 +1,6 @@
-.travis.yml
+# YOU PROBABLY DON'T WANT TO USE THIS
+
+Create a `.travis.yml` file on the root:
 
 ```
 branches:
