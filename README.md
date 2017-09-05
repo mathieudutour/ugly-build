@@ -11,31 +11,32 @@ node_js:
 
 cache:
   directories:
+    - $HOME/.cache/pip
     - node_modules
+
+before_install:
+  - pip install --user awscli
+  - export PATH=$PATH:$HOME/.local/bin
 
 install:
   - npm install
-  - pip install awscli
 
 script:
   - node ./node_modules/ugly-build/index.js build
 deploy:
-  - on:
-      branch: master
-    provider: pages
+  - provider: pages
     skip_cleanup: true
     github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
     local_dir: .build
-  - on:
-      branch: master
-    provider: s3
+  - provider: s3
     skip_cleanup: true
     access_key_id: $AWS_ACCESS_KEY_ID # Set in travis-ci.org dashboard
     secret_access_key: $AWS_SECRET_ACCESS_KEY # Set in travis-ci.org dashboard
     bucket: $AWS_S3_BUCKED # Set in travis-ci.org dashboard
     local_dir: .build
+    region: eu-west-1
 after_deploy:
-  - - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+  - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
 ```
 
 on [travis-ci.org](https://travis-ci.org) add:

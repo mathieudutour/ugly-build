@@ -21,6 +21,7 @@ const mdRenderer = require('markdown-it')({
   }
 })
 mdRenderer.use(require('markdown-it-emoji'))
+mdRenderer.use(require('markdown-it-anchor'))
 
 const cwd = process.cwd()
 const buildFolder = path.join(cwd, '.build')
